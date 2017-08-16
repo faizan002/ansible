@@ -1,0 +1,7 @@
+---
+plugin_list:
+  - active-directory
+  - ant
+  - git
+  - build-pipeline-plugin
+  - gitlab-plugin

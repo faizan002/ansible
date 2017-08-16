@@ -1,0 +1,40 @@
+---
+- hosts: all
+  remote_user: vagrant
+  become: yes
+
+  vars:
+    java_version: 8
+    java_subversion: 131
+    java_build_custom: 11
+    jdk_version_detail_custom: "{{ java_version }}u{{ java_subversion }}-b{{ java_build_custom }}"
+    jdk_tarball_hash: d54c1d3a095b4ff2b6607d096fa80163
+    jdk_tarball_url: "http://download.oracle.com/otn-pub/java/jdk/{{ jdk_version_detail_custom }}/{{ jdk_tarball_hash }}/{{ jdk_tarball_file }}"
+
+    #java_version: 8
+    #java_subversion:  112
+    jdk_full_version: jdk1.8.0_131
+    rebar_bin: /usr/local/bin/rebar
+    rebar_version:  2.5.1
+    jenkins_hostname: jenkins.se.cepheid.pri
+    webserverurlforlocalhost: c360admin.cepheid.com
+    hostname: jenkins-agent1
+    fqdn: jenkins-agent1.se.cepheid.pri
+    jenkins_master_public_key:  ssh-rsa AAAAB3NzaC1yc2EAAAADAQABAAABAQDbbOwvdbzGSVScwZPvhBez8UsqUM9wLa1ddpylKq7VV/GrOaIz0ls2q3KSuJN8AN7XbIpeB1cQ/WyYY0l0L5ArA3z4A7snlQS3NIJuON7WlSv/nWh2r5dNeJLIoCO2WQ9n/zUILCzTEAnwHojYzVXa+kOH7qT7oNhFzIav0gnGchCcUXmj5Ivp1tSZT38tpqlu4IyDIWJfiipFsVcjgjQ1YMrrZkI6m2ya2Gerse50IKNpZ0rqQvVTrLLH6wxoTJ/1dNd/KPp8TPZd333uxGHHd4SNe5u3wLoNLqD/xWlKJb7IZtQ8hEJrQBxaS9FNHoJNEkjl+1PztyyL1tRAHw3f vagrant@jenkins.se.cepheid.pri
+
+    awscli_user: vagrant
+    awscli_group: vagrant
+    awscli_user_home: /home/vagrant
+
+    awscli_aws_access_key_id: AKIAJ245YMK27LO2HZVQ
+    awscli_aws_secret_access_key: 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
+
+    # default region
+    awscli_region: eu-west-2
+  roles:
+    - williamyeh.oracle-java
+    - basic-config
+    - ansible-awscli
+
+
+

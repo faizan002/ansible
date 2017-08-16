@@ -1,0 +1,62 @@
+---
+- name: Install jenkins
+  rpm_key:
+    state: present
+    key: https://pkg.jenkins.io/redhat-stable/jenkins.io.key
+    validate_certs: no
+
+- name: Add Repository for jenkins
+  yum_repository:
+    name: jenkins
+    description: Repo needed for automatic installation of Jenkins
+    baseurl: http://pkg.jenkins.io/redhat-stable
+    #gpgcheck: yes
+    gpgkey: https://pkg.jenkins.io/redhat-stable/jenkins.io.key
+
+    #Pre requisite: add key and repo
+- name: Install jenkins
+  yum:
+    name: jenkins
+    state: present
+
+#Start/Stop jenkins
+- name: Start jenkins service
+  service:
+    name: jenkins
+    state: started
+
+#Start jenkins on startup
+- name: Start jenkins on boot
+  shell: chkconfig jenkins on
+
+- name: Jenkins Skip startUp configuration
+  lineinfile:
+    dest=/etc/sysconfig/jenkins
+    regexp='^JENKINS_JAVA_OPTIONS='
+    line='JENKINS_JAVA_OPTIONS="-Djava.awt.headless=true -Djenkins.install.runSetupWizard=false"'
+  register: result_skip_startup_wizard
+
+#Add pause - this needs to be removed.
+#- pause:
+#    minutes: 1
+#    prompt: "Artificail delay"
+
+- name: restart_jenkins_service
+  service:
+    name: jenkins
+    state: restarted
+  when: result_skip_startup_wizard|succeeded
+
+#Add wait - to start jenkins before installing jenkins plugins.
+- name: Wait for Jenkins to start up
+  uri:
+    url: http://localhost:8080
+    status_code: 200
+    timeout: 5
+  register: jenkins_service_status
+  # Keep trying for 5 mins in 5 sec intervals
+  retries: 60
+  delay: 5
+  until: >
+     'status' in jenkins_service_status and
+     jenkins_service_status['status'] == 200

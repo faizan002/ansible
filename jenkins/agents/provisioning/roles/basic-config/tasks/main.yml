@@ -1,0 +1,89 @@
+---
+- name: Install git
+  yum:
+    name: git
+    state: present
+
+- name: "generate /etc/hosts.ansible file"
+  template: "src=etchosts.j2  dest='/etc/hosts' owner=root group=root mode=0644"
+  become: true
+
+- name: "install firefox"
+  yum:
+    name: firefox
+    state:  latest
+
+- name: "install zip"
+  yum:
+    name: zip
+    state:  latest
+
+- name: "install unzip"
+  yum:
+    name: unzip
+    state:  latest
+
+- name: "Create remote jhome dir for slave home"
+  file:
+    path: /home/vagrant/jenkins
+    state: directory
+    mode: 0755
+    owner:  vagrant
+
+   #Install JCE
+- name: "download JCE"
+  get_url:
+    url:  http://download.oracle.com/otn-pub/java/jce/8/jce_policy-8.zip
+    dest: /tmp/jce_policy-8.zip
+    headers: "Cookie: oraclelicense=accept-securebackup-cookie"
+    mode: 0755
+    owner:  vagrant
+
+- name: "Unzip the jce_policy file"
+  unarchive:
+    src: /tmp/jce_policy-8.zip
+    dest: /tmp/
+    copy: no
+
+- name: "Copy local policy file"
+  command: sudo cp /tmp/UnlimitedJCEPolicyJDK8/local_policy.jar /usr/java/{{ jdk_full_version }}/jre/lib/security/.
+
+- name: "Copy US export policy file"
+  command: sudo cp /tmp/UnlimitedJCEPolicyJDK8/US_export_policy.jar /usr/java/{{ jdk_full_version }}/jre/lib/security/.
+
+- name: "Set authorized key for connectivity with master"
+  authorized_key:
+    user: vagrant
+    state: present
+    key: "{{ jenkins_master_public_key }}"
+
+- name:  "Update CENTOS"
+  yum:
+    name: '*'
+    state:  latest
+
+- name: "Install python pip"
+  yum:
+    name: 'python-pip'
+    state:  latest
+
+- name:  "Install epel-release Erlang dependency"
+  yum:
+    name: epel-release
+    state:  present
+
+- name:  "Install erlang 18"
+  yum:
+    name: https://packages.erlang-solutions.com/erlang/esl-erlang/FLAVOUR_1_general/esl-erlang_18.0-1~centos~7_amd64.rpm
+    state:  present
+
+- name: "Install rebar from a precompiled script"
+  get_url:  url=https://github.com/rebar/rebar/releases/download/{{ rebar_version }}/rebar
+            dest={{ rebar_bin }}
+            mode=0777
+  sudo: yes
+
+
+
+
+

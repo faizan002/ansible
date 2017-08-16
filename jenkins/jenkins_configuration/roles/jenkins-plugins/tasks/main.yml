@@ -1,0 +1,10 @@
+---
+- name: Install plugins
+  jenkins_plugin:
+    name: "{{ item }}"
+  with_items: "{{ plugin_list }}"
+
+- name: restart_jenkins_service
+  service:
+    name: jenkins
+    state: restarted

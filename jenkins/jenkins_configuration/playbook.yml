@@ -1,0 +1,57 @@
+---
+- hosts: all
+  remote_user: vagrant
+  become: yes
+  
+  vars:
+    java_version: 8
+    java_subversion:  77
+
+  roles:
+    - williamyeh.oracle-java
+
+  tasks:
+  - name: Install JAVA
+    yum:
+     name: java-1.8.0-openjdk-devel
+     state: present
+
+  - name: Install git
+    yum: 
+     name: git 
+     state: present
+  
+ # - name: Add key for jenkins installation
+  - rpm_key: 
+     state: present
+     key: https://pkg.jenkins.io/redhat-stable/jenkins.io.key
+
+  - name: Add Repository for jenkins
+    yum_repository:
+     name: jenkins
+     description: Repo needed for automatic installation of Jenkins
+     baseurl: http://pkg.jenkins.io/redhat-stable 
+     gpgcheck: yes
+     gpgkey: https://pkg.jenkins.io/redhat-stable/jenkins.io.key
+
+#Pre requisite: add key and repo
+  - name: Install jenkins
+    yum:
+     name: jenkins
+     state: present
+
+#Start/Stop jenkins
+  - name: Start jenkins service
+    service:
+     name: jenkins
+     state: started
+
+#Start jenkins on startup
+  - name: Start jenkins on boot
+    shell: chkconfig jenkins on
+
+#Install plugins
+  - name: Install plugin
+    jenkins_plugin: 
+      name: active-directory
+       
